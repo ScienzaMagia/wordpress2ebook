@@ -24,13 +24,15 @@ class Wprip:
             
             #Processes a single-chapter story
             if tagIndex == -1: 
-                doc = open("Rips/"+title +".html", "w") 
-                print(title)            
+                
+                       
                 
                 chapterRaw = requests.get(url)
                 chapterSoup = BeautifulSoup(chapterRaw.content, 'html.parser')
                 chapterTitle = chapterSoup.find("h1", class_ = "entry-title").string
                 author = chapterSoup.find("span", class_ = "author vcard").a.string
+                print("\n"+title + " by " + author) 
+                doc = open("Rips/["+author +"] "+title +".html", "w") 
                 doc.write("<!DOCTYPE html>\n<html>\n<body>\n<h1>"+title+ " by " + author + "</h1>")
                 doc.write("\n<h2>" + chapterTitle + "</h2>\n")
                 entryContent = chapterSoup.find("div", class_ = "entry-content")
@@ -40,11 +42,13 @@ class Wprip:
                 #print(chapterText)
                 doc.write("\n</body>\n</html>")
                 doc.close()           
-                print ("\nFinished " + title)
+                print ("Finished " + title)
 
             #Processes a multi-chapter story
             else:
                 baseUrl = url.replace("?order=asc", "")
+                if baseUrl[-1] != '/':
+                    baseUrl = baseUrl + '/'
                 chapters = list()
                 pageNum = 1
                 author = ""
@@ -53,10 +57,12 @@ class Wprip:
                 while url != None:
                 
                     page = requests.get(url)
+                    #print (url)
                     soup = BeautifulSoup(page.content, 'html.parser')
                     is404 = soup.find("section", class_="error-404 not-found")
            
                     if is404 != None:
+                        #print("404")
                         url = None
                     else:
                         ch = soup.find_all("h1", class_="entry-title")
@@ -66,8 +72,9 @@ class Wprip:
                         author = soup.find("span", class_ = "author vcard").a.string
                         url = baseUrl + "page"+str(pageNum)
 
-                doc = open("Rips/"+title +".html", "w") 
-                print(title)            
+                doc = open("Rips/["+author +"] "+title +".html", "w") 
+                print("\n"+title + " by " + author)            
+                print (str(len(chapters)) + " chapters")
                 doc.write("<!DOCTYPE html>\n<html>\n<body>\n<h1>"+title+ " by " + author + "</h1>")
              
                 for c in chapters:
@@ -82,7 +89,7 @@ class Wprip:
                     #print(chapterText)
                 doc.write("\n</body>\n</html>")
                 doc.close()           
-                print ("\nFinished " + title)
+                print ("Finished " + title)
         stories.close()
 
 
