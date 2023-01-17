@@ -32,7 +32,7 @@ class Wprip:
                 chapterTitle = chapterSoup.find("h1", class_ = "entry-title").string
                 author = chapterSoup.find("span", class_ = "author vcard").a.string
                 print("\n"+title + " by " + author) 
-                doc = open("Rips/["+author +"] "+title +".html", "w") 
+                doc = open("Rips/"+title + " - " + author + ".html", "w") 
                 doc.write("<!DOCTYPE html>\n<html>\n<body>\n<h1>"+title+ " by " + author + "</h1>")
                 doc.write("\n<h2>" + chapterTitle + "</h2>\n")
                 entryContent = chapterSoup.find("div", class_ = "entry-content")
@@ -72,7 +72,7 @@ class Wprip:
                         author = soup.find("span", class_ = "author vcard").a.string
                         url = baseUrl + "page"+str(pageNum)
 
-                doc = open("Rips/["+author +"] "+title +".html", "w") 
+                doc = open("Rips/"+title + " - " + author + ".html", "w") 
                 print("\n"+title + " by " + author)            
                 print (str(len(chapters)) + " chapters")
                 doc.write("<!DOCTYPE html>\n<html>\n<body>\n<h1>"+title+ " by " + author + "</h1>")
