@@ -1,5 +1,6 @@
 import requests
 import re
+import os
 from requests.auth import HTTPBasicAuth 
 from bs4 import BeautifulSoup
 from bs4 import SoupStrainer
@@ -16,20 +17,21 @@ class Wprip:
             
             story = line.strip()
             titleIndex = story.find(",")
- 
             title = story[0:titleIndex]
             url = story[titleIndex+1:len(story)]
             tagIndex = url.find("/tag/") #Determines if the story is a direct link to a single chapter or a tagged list of chapters.
             i = 1
             
-            
-            if tagIndex == -1:
+            #Processes a single-chapter story
+            if tagIndex == -1: 
                 doc = open("Rips/"+title +".html", "w") 
                 print(title)            
-                doc.write("<!DOCTYPE html>\n<html>\n<body>\n<h1>"+title+"</h1>")
+                
                 chapterRaw = requests.get(url)
                 chapterSoup = BeautifulSoup(chapterRaw.content, 'html.parser')
                 chapterTitle = chapterSoup.find("h1", class_ = "entry-title").string
+                author = chapterSoup.find("span", class_ = "author vcard").a.string
+                doc.write("<!DOCTYPE html>\n<html>\n<body>\n<h1>"+title+ " by " + author + "</h1>")
                 doc.write("\n<h2>" + chapterTitle + "</h2>\n")
                 entryContent = chapterSoup.find("div", class_ = "entry-content")
                 chapterText = entryContent.find_all("p")
@@ -40,11 +42,12 @@ class Wprip:
                 doc.close()           
                 print ("\nFinished " + title)
 
-            
+            #Processes a multi-chapter story
             else:
                 baseUrl = url.replace("?order=asc", "")
                 chapters = list()
                 pageNum = 1
+                author = ""
                 url = baseUrl + "page" + str(pageNum)
                
                 while url != None:
@@ -60,11 +63,12 @@ class Wprip:
                         for c in ch:
                             chapters.insert(0,c.a["href"])
                         pageNum = pageNum + 1
+                        author = soup.find("span", class_ = "author vcard").a.string
                         url = baseUrl + "page"+str(pageNum)
 
                 doc = open("Rips/"+title +".html", "w") 
                 print(title)            
-                doc.write("<!DOCTYPE html>\n<html>\n<body>\n<h1>"+title+"</h1>")
+                doc.write("<!DOCTYPE html>\n<html>\n<body>\n<h1>"+title+ " by " + author + "</h1>")
              
                 for c in chapters:
                     chapterRaw = requests.get(c)
